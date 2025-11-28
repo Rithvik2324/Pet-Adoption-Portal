@@ -1,54 +1,45 @@
-import React, { useEffect, useState } from 'react';
-import { fetchPets, createPet, adoptPet, deletePet } from './api';
-import PetList from './components/PetList';
-import AddPet from './components/AddPet';
+import React from 'react';
+import { Routes, Route, Link } from 'react-router-dom';
+import Home from './pages/Home';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import AddPet from './pages/AddPet';
+import Dashboard from './pages/Dashboard';
+import { useAuth } from './contexts/AuthContext';
+import PrivateRoute from './components/PrivateRoute';
 
-export default function App() {
-  const [pets, setPets] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  const load = async () => {
-    setLoading(true);
-    const data = await fetchPets();
-    setPets(data);
-    setLoading(false);
-  };
-
-  useEffect(() => { load(); }, []);
-
-  const handleAdd = async (pet) => {
-    const created = await createPet(pet);
-    setPets(prev => [created, ...prev]);
-  };
-
-  const handleAdopt = async (id) => {
-    const name = prompt('Your name to adopt (leave blank for Anonymous)') || 'Anonymous';
-    const updated = await adoptPet(id, name);
-    setPets(prev => prev.map(p => p._id === id ? updated : p));
-  };
-
-  const handleDelete = async (id) => {
-    if (!window.confirm('Delete this pet?')) return;
-    await deletePet(id);
-    setPets(prev => prev.filter(p => p._id !== id));
-  };
-
+export default function App(){
+  const { user, logout } = useAuth();
   return (
-    <div className="container">
-      <header>
-        <h1>Pet Adoption Portal</h1>
-        <p>Quick MERN demo — list, add, adopt</p>
-      </header>
+    <div>
+      <nav className="nav">
+        <Link to="/" className="brand">PetAdopt</Link>
+        <div>
+          {user ? (
+            <>
+              <span className="muted">Hi, {user.name}</span>
+              {user.role === 'admin' && <Link to="/dashboard" className="nav-btn">Dashboard</Link>}
+              {user.role === 'admin' && <Link to="/add" className="nav-btn">Add Pet</Link>}
+              <button className="nav-btn" onClick={logout}>Logout</button>
+            </>
+          ) : (
+            <>
+              <Link to="/login" className="nav-btn">Login</Link>
+              <Link to="/register" className="nav-btn">Register</Link>
+            </>
+          )}
+        </div>
+      </nav>
 
-      <AddPet onAdd={handleAdd} />
-
-      {loading ? <p>Loading pets…</p> : (
-        <PetList pets={pets} onAdopt={handleAdopt} onDelete={handleDelete} />
-      )}
-
-      <footer>
-        <small>Built fast — customize as needed</small>
-      </footer>
+      <main className="main">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/add" element={<PrivateRoute adminOnly><AddPet/></PrivateRoute>} />
+          <Route path="/dashboard" element={<PrivateRoute adminOnly><Dashboard/></PrivateRoute>} />
+        </Routes>
+      </main>
     </div>
   );
 }

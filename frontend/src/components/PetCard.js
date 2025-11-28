@@ -1,21 +1,14 @@
 import React from 'react';
 
-export default function PetCard({ pet, onAdopt, onDelete }) {
+export default function PetCard({ pet, onView }){
   return (
-    <div className={`card ${pet.adopted ? 'adopted' : ''}`}>
-      <div className="img-wrap">
-        <img src={pet.image || (pet.type === 'Cat' ? 'https://placekitten.com/300/200' : 'https://placedog.net/300/200')} alt={pet.name} />
-      </div>
-      <div className="card-body">
-        <h3>{pet.name} {pet.adopted && <span className="badge">ADOPTED</span>}</h3>
-        <p><strong>Type:</strong> {pet.type} • <strong>Age:</strong> {pet.age}</p>
-        {pet.breed && <p><strong>Breed:</strong> {pet.breed}</p>}
-        <p>{pet.description}</p>
-        <div className="actions">
-          {!pet.adopted && <button onClick={onAdopt}>Adopt</button>}
-          <button className="del" onClick={onDelete}>Delete</button>
-          {pet.adopted && <p className="adopt-info">Adopted by {pet.adoptedBy}</p>}
-        </div>
+    <div className="card">
+      <img src={pet.image || (pet.type?.toLowerCase().includes('cat') ? 'https://placekitten.com/400/240' : 'https://placedog.net/400/240')} alt={pet.name} />
+      <h3>{pet.name} {pet.adopted && <span style={{color:'#ef4444',fontSize:12}}> (Adopted)</span>}</h3>
+      <p className="small">{pet.type} • {pet.age} yrs • {pet.breed}</p>
+      <p className="small">{pet.description?.slice(0,90)}...</p>
+      <div style={{display:'flex',gap:8,marginTop:8}}>
+        <button className="btn" onClick={onView}>View</button>
       </div>
     </div>
   );
